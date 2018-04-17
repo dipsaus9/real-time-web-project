@@ -1,0 +1,22 @@
+.login{ width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center;
+  &.inactive{ display: none; }
+}
+.loged-in{ display: none;
+  &.active{ width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center;}
+}
+body{ position: relative; top: 0; left: 0; padding: 0;
+  &.buzz{ animation: buzzing .1s ease-in-out; animation-iteration-count: 3; }
+}
+@keyframes buzzing {
+  0%{ top: 0px; left: 0px; }
+  10%{ top: 5px; left: 10px; }
+  20%{ top: 10px; left: 10px; }
+  30%{ top: 12px; left: 20px; }
+  40%{ top: -20px; left: 10px; }
+  50%{ top: 13px; left: -10px; }
+  60%{ top: -20px; left: 10px; }
+  70%{ top: 20px; left: 0px; }
+  80%{ top: -20px; left: 10px; }
+  90%{ top: 0px; left: -20px; }
+  100%{ top: 0px; left: 0px; }
+}

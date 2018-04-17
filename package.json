@@ -1,0 +1,45 @@
+{
+  "name": "real-time-web",
+  "version": "1.0.0",
+  "description": "Pong with sockets",
+  "main": "server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run serverWatch\" \"npm run  watch-css\" \"npm run babelWatch\"",
+    "start": "node ./server/app.js",
+    "build": "npm run clean && mkdir public && concurrently \"npm run build-css\" \"npm run copyJs\" \"npm run copyImages\"",
+    "copyImages": "copyfiles -u 1 src/img/*.* public",
+    "copyJs": "copyfiles -u 1 src/js/*.* public",
+    "build-css": "node-sass src/scss/app.scss public/css/app.css",
+    "watch-css": "nodemon -e scss -x \"npm run build-css\"",
+    "babelWatch": "nodemon --watch ./src/js -x \"npm run copyJs\"",
+    "serverWatch": "nodemon --watch ./server -x \"npm start\"",
+    "clean": "del-cli public/**"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dipsaus9/real-time-web.git"
+  },
+  "keywords": [
+    "socket"
+  ],
+  "author": "dipsaus9",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dipsaus9/real-time-web-project/issues"
+  },
+  "homepage": "https://github.com/dipsaus9/real-time-web-project#readme",
+  "dependencies": {
+    "concurrently": "^3.5.1",
+    "copyfiles": "^2.0.0",
+    "del-cli": "^1.1.0",
+    "ejs": "^2.5.8",
+    "express": "^4.16.3",
+    "http": "0.0.0",
+    "mapbox": "^1.0.0-beta10",
+    "node-sass": "^4.8.3",
+    "socket.io": "^2.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.3"
+  }
+}
