@@ -2,10 +2,11 @@ const express = require('express')
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
 //own modules
 //all pages
 const home = require('./routes/home.js');
+const join = require('./routes/joinLobby.js');
+const create = require('./routes/createLobby.js');
 
 //sockets
 const sockets = require('./sockets.js');
@@ -27,6 +28,8 @@ const routerSettings = {
   configureRoutes: function(){
 
     app.use('/', home);
+    app.use('/lobby/join', join);
+    app.use('/lobby/create', create);
   }
 };
 
