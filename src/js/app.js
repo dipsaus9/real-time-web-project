@@ -177,6 +177,10 @@ const socketHandler = {
           console.log('er zijn nog niet genoeg mensen in de lobby');
         }
       });
+      socket.on('startGameHost', function(room){
+        let url = '/game/host/' + room.roomNumber;
+        window.location.href = url;
+      });
     }
   }
 };

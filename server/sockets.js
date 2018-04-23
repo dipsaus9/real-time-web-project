@@ -1,7 +1,7 @@
 const sockets = {
   init: function(io){
     this.create(io);
-    this.join(io);
+    this.party(io);
   },
   roomNumbers: [],
   create: function(io){
@@ -66,7 +66,7 @@ const sockets = {
       socket.on('startGame', function(id){
         for(let i = 0; i < self.roomNumbers.length; i++){
           if(self.roomNumbers[i].host === id){
-            io.to(id).emit('startGame', self.roomNumbers[i]);
+            io.to(id).emit('startGameHost', self.roomNumbers[i]);
             for(let k = 0; k < self.roomNumbers[i].players.length; k++){
               io.to(self.roomNumbers[i].players[k].user).emit('startGame', self.roomNumbers[i]);
             }
@@ -95,7 +95,7 @@ const sockets = {
       return roomNumber;
     }
   },
-  join: function(io){
+  party: function(io){
     io.on('connection', function(socket){
       socket.on('disconnect', function(){
 

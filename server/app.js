@@ -17,8 +17,8 @@ const routerSettings = {
     this.configureRoutes();
   },
   basicSettings: function(){
-    http.listen(1337, function () {
-      console.log('server is running on port 1337');
+    http.listen(3000, function () {
+      console.log('server is running on port 3000');
     });
     app.use(express.static('public'));
     app.set('view engine', 'ejs');
@@ -30,6 +30,8 @@ const routerSettings = {
     app.use('/', home);
     app.use('/lobby/join', join);
     app.use('/lobby/create', create);
+    app.use('/game/host/:id', create);
+    app.use('/game/join/:id', create);
   }
 };
 
