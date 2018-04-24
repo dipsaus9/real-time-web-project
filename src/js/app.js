@@ -67,14 +67,16 @@ const socketHandler = {
     this.home();
     this.join();
     this.create();
+    this.players();
   },
   home: function(){
-    if(main.classList.contains('home')){
-
-    }
+    // if(main.classList.contains('home')){
+    //
+    // }
   },
   join: function(){
     let you = '';
+    let yourPlayer = 0;
     if(main.classList.contains('join')){
       socket.on('connected', function(id){
         you = id;
@@ -95,7 +97,9 @@ const socketHandler = {
           }
         }
       });
-
+      socket.on('roomFull', function(){
+        alert('room is full');
+      });
       socket.on('joinedRoom', function(room){
         let joined = false;
         let players = room.players;
@@ -113,6 +117,7 @@ const socketHandler = {
             let li = document.createElement('li');
             let liText = document.createTextNode('player: ' + players[i].player);
             if(players[i].user === you){
+              yourPlayer = players[i].player;
               li.setAttribute('class', 'you');
             }
             li.appendChild(liText);
@@ -121,7 +126,6 @@ const socketHandler = {
         }
       });
       socket.on('hostDisconnected', function(room){
-        console.log(room);
         let players = room.players;
         for(let i = 0; i < players.length; i++){
           if(players[i].user === you){
@@ -132,6 +136,14 @@ const socketHandler = {
       });
       socket.on('startGame', function(room){
         console.log(room);
+        if(yourPlayer === 1){
+          let url = '/game/player1/' + room.roomNumber;
+          window.location.href = url;
+        }
+        else if (yourPlayer === 2) {
+          let url = '/game/player2/' + room.roomNumber;
+          window.location.href = url;
+        }
       });
     }
   },
@@ -169,7 +181,8 @@ const socketHandler = {
           }
         }
       });
-      startGame.addEventListener('click', function(e){
+
+      startGame.addEventListener('click', function(){
         if(lobbyPlayers.length === 2){
           socket.emit('startGame', you);
         }
@@ -180,6 +193,34 @@ const socketHandler = {
       socket.on('startGameHost', function(room){
         let url = '/game/host/' + room.roomNumber;
         window.location.href = url;
+      });
+    }
+  },
+  players: function(){
+    let you = '';
+    let player = '';
+    if(main.classList.contains('player')){
+      socket.on('connected', function(id){
+        you = id;
+        let url = window.location.href;
+        let room = '';
+        if(main.classList.contains('player1')){
+          player = 1;
+
+          room = url.split('/player1/');
+          room = room[1];
+        }
+        else if (main.classList.contains('player2')) {
+          player = 2;
+          room = url.split('/player2/');
+          room = room[1];
+        }
+        let obj = {
+          player: you,
+          nr: player,
+          room: room
+        };
+        socket.emit('playerConnected', obj);
       });
     }
   }

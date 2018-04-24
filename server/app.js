@@ -7,6 +7,9 @@ const io = require('socket.io')(http);
 const home = require('./routes/home.js');
 const join = require('./routes/joinLobby.js');
 const create = require('./routes/createLobby.js');
+const gameHost = require('./routes/gameHost.js');
+const player1 = require('./routes/player1.js');
+const player2 = require('./routes/player2.js');
 
 //sockets
 const sockets = require('./sockets.js');
@@ -30,8 +33,9 @@ const routerSettings = {
     app.use('/', home);
     app.use('/lobby/join', join);
     app.use('/lobby/create', create);
-    app.use('/game/host/:id', create);
-    app.use('/game/join/:id', create);
+    app.use('/game/host/:id', gameHost);
+    app.use('/game/player1/:id', player1);
+    app.use('/game/player2/:id', player2);
   }
 };
 
