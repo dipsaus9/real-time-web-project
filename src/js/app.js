@@ -65,17 +65,12 @@ const socket = io();
 
 const socketHandler = {
   init: function(){
-    this.home();
     this.join();
     this.create();
     this.players();
     this.host();
   },
-  home: function(){
-    // if(main.classList.contains('home')){
-    //
-    // }
-  },
+
   join: function(){
     let you = '';
     let yourPlayer = 0;
@@ -232,7 +227,93 @@ const socketHandler = {
           main.classList.add('active');
           play = true;
         });
+        let buttons = document.querySelectorAll('.settings div');
+        buttons.forEach(function(button){
+          button.addEventListener('click', function(e){
+            e.preventDefault();
+            buttons.forEach(function(b){
+              b.classList.remove('active');
+            });
+            e.target.classList.add('active');
+          });
+        });
         window.addEventListener('deviceorientation', self.handleOrientation, true);
+        let left = document.querySelector('.left');
+        let right = document.querySelector('.right');
+        let startLeft = false;
+        let startRight = false;
+        let position = 50;
+        let timeoutId = undefined;
+
+        left.addEventListener('mousedown', function(){
+          startLeft = true;
+          holdLeftMouseDown();
+        });
+        left.addEventListener('mouseup', function(){
+          startLeft = false;
+          window.clearTimeout(timeoutId);
+          holdLeftMouseDown();
+        });
+        left.addEventListener('touchstart', function(){
+          startLeft = true;
+          holdLeftMouseDown();
+        });
+        left.addEventListener('touchend', function(){
+          startLeft = false;
+          window.clearTimeout(timeoutId);
+          holdLeftMouseDown();
+        });
+
+
+
+        right.addEventListener('mousedown', function(){
+          startRight = true;
+          holdRightMouseDown();
+        });
+        right.addEventListener('mouseup', function(){
+          startRight = false;
+          window.clearTimeout(timeoutId);
+          holdRightMouseDown();
+        });
+        right.addEventListener('touchstart', function(){
+          startRight = true;
+          holdRightMouseDown();
+        });
+        right.addEventListener('touchend', function(){
+          startRight = false;
+          window.clearTimeout(timeoutId);
+          holdRightMouseDown();
+        });
+
+        let tab = document.querySelector('.buttons');
+        function holdRightMouseDown(){
+          if(tab.classList.contains('active')){
+            if(startRight){
+              if(position < 100){
+                position += 1;
+                socket.emit('cords', position);
+              }
+              timeoutId = window.setTimeout(function(){
+                holdRightMouseDown();
+              }, 30);
+            }
+          }
+        }
+
+        function holdLeftMouseDown(){
+          if(tab.classList.contains('active')){
+            if(startLeft){
+              if(position > 0){
+                position -= 1;
+                socket.emit('cords', position);
+              }
+              timeoutId = window.setTimeout(function(){
+                holdLeftMouseDown();
+              }, 30);
+            }
+          }
+        }
+
       });
     }
   },
@@ -279,33 +360,33 @@ const socketHandler = {
             pad2.style.left = pad2Position;
             player2cords = player2.position;
           }
-          let ball = document.querySelector('.ball');
-          
         });
+        let ball = document.querySelector('.ball');
+
       });
     }
   },
   handleOrientation: function(e){
-    var beta = e.beta;
-    var difference = previousPostion - beta;
-    //maybe change the fire limit for later?
-    if(difference > 0 || difference < 0){
-      previousPostion = beta;
-      //cords previousPostion be from -180 to 180 create scale from this
-      //create scale from 0 to 360
-      let calcCord = beta + 180;
-      //create scale from 0 to 100, then get the scale from 35 to 65, this will be the position of the element in %
-      let position = ((calcCord * 100 / 360) - 35) / 0.3;
-      if(position < 0){
-        position = 0;
+    let tab = document.querySelector('.turn');
+    if(tab.classList.contains('active')){
+      var beta = e.beta;
+      var difference = previousPostion - beta;
+      //maybe change the fire limit for later?
+      if(difference > 0 || difference < 0){
+        previousPostion = beta;
+        //cords previousPostion be from -180 to 180 create scale from this
+        //create scale from 0 to 360
+        let calcCord = beta + 180;
+        //create scale from 0 to 100, then get the scale from 35 to 65, this will be the position of the element in %
+        let position = ((calcCord * 100 / 360) - 35) / 0.3;
+        if(position < 0){
+          position = 0;
+        }
+        else if(position > 100){
+          position = 100;
+        }
+        socket.emit('cords', position);
       }
-      else if(position > 100){
-        position = 100;
-      }
-      // if(number !== 0){
-      //emit a position from 0% to 100%
-      socket.emit('cords', position);
-      // }
     }
   }
 };
