@@ -60,6 +60,7 @@
 //   element2.style.top = secondPosition;
 // });
 let main = document.querySelector('main');
+let previousPostion = 180;
 const socket = io();
 
 const socketHandler = {
@@ -136,6 +137,7 @@ const socketHandler = {
         }
       });
       socket.on('startGame', function(room){
+        //add timeout so the server can load first
         setTimeout(function(){
           if(yourPlayer === 1){
             let url = '/game/player1/' + room.roomNumber;
@@ -201,6 +203,8 @@ const socketHandler = {
   players: function(){
     let you = '';
     let player = '';
+    let play = false;
+    let self = this;
     if(main.classList.contains('player')){
       socket.on('connected', function(id){
         you = id;
@@ -225,9 +229,10 @@ const socketHandler = {
         socket.emit('playerConnected', obj);
 
         socket.on('allPlayersAreConnected', function(){
-          console.log('test');
           main.classList.add('active');
+          play = true;
         });
+        window.addEventListener('deviceorientation', self.handleOrientation, true);
       });
     }
   },
@@ -245,7 +250,62 @@ const socketHandler = {
           room: room
         };
         socket.emit('hostConnected', obj);
+
+        socket.on('allPlayersAreConnected', function(){
+          main.classList.add('active');
+        });
+        let player1Cords = 50;
+        let player2Cords = 50;
+        socket.on('cords', function(cords){
+          let player1;
+          let player2;
+          for(let i = 0; i < cords.length; i++){
+            if(cords[i].playerNr === 1){
+              player1 = cords[i];
+            }
+            else if(cords[i].playerNr === 2){
+              player2 = cords[i];
+            }
+          }
+          let pad1 = document.querySelector('.player1Pad');
+          let pad2 = document.querySelector('.player2Pad');
+          if(player1){
+            let pad1Position = player1.position + '%';
+            pad1.style.left = pad1Position;
+            player1cords = player1.position;
+          }
+          if(player2){
+            let pad2Position = player2.position + '%';
+            pad2.style.left = pad2Position;
+            player2cords = player2.position;
+          }
+          let ball = document.querySelector('.ball');
+          
+        });
       });
+    }
+  },
+  handleOrientation: function(e){
+    var beta = e.beta;
+    var difference = previousPostion - beta;
+    //maybe change the fire limit for later?
+    if(difference > 0 || difference < 0){
+      previousPostion = beta;
+      //cords previousPostion be from -180 to 180 create scale from this
+      //create scale from 0 to 360
+      let calcCord = beta + 180;
+      //create scale from 0 to 100, then get the scale from 35 to 65, this will be the position of the element in %
+      let position = ((calcCord * 100 / 360) - 35) / 0.3;
+      if(position < 0){
+        position = 0;
+      }
+      else if(position > 100){
+        position = 100;
+      }
+      // if(number !== 0){
+      //emit a position from 0% to 100%
+      socket.emit('cords', position);
+      // }
     }
   }
 };

@@ -116,7 +116,8 @@ const sockets = {
             contiunue = true;
             let obj = {
               playerNr: player.nr,
-              user: socket.id
+              user: socket.id,
+              position: 50,
             };
             if(!self.games[i].players){
               self.games[i].players = [];
@@ -136,7 +137,6 @@ const sockets = {
                 console.log('player bestaat al');
               }
             }
-            console.log('players', self.games[i].players.length);
             if(self.games[i].players.length  === 2){
               enoughPlayers = true;
             }
@@ -146,7 +146,6 @@ const sockets = {
           if(enoughPlayers){
             for(let i = 0; i < self.games.length; i++){
               if(self.games[i].roomNr === player.room){
-                console.log(self.games[i]);
                 io.to(self.games[i].host).emit('allPlayersAreConnected');
                 for(let k = 0; k < self.games[i].players.length; k++){
                   io.to(self.games[i].players[k].user).emit('allPlayersAreConnected');
@@ -200,6 +199,28 @@ const sockets = {
                 }
               }
             }
+          }
+        }
+      });
+      socket.on('cords', function(cord){
+        let index = -1;
+        let user;
+        for(let i = 0; i < self.games.length; i++){
+          for(let k = 0; k < self.games[i].players.length; k++){
+            if(self.games[i].players[k].user === socket.id){
+              user = socket.id;
+              index = i;
+              break;
+            }
+          }
+          if(self.games[index]){
+            let party = self.games[index];
+            for(let k = 0; k < party.players.length; k++){
+              if(party.players[k].user === socket.id){
+                party.players[k].position = cord;
+              }
+            }
+            io.to(party.host).emit('cords', party.players);
           }
         }
       });
