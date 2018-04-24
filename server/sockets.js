@@ -5,6 +5,7 @@ const sockets = {
   },
   rooms: [],
   gameRooms: [],
+  games: [],
   create: function(io){
     //all create a lobby sockets
     let self = this;
@@ -55,7 +56,6 @@ const sockets = {
       socket.on('disconnect', function(){
         for(let i = 0; i < self.rooms.length; i++){
           if(self.rooms[i].host == socket.id){
-            let data = self.rooms[i];
             io.emit('hostDisconnected', self.rooms[i]);
             self.rooms.splice(i, 1);
           }
@@ -107,16 +107,100 @@ const sockets = {
     let self = this;
     io.on('connection', function(socket){
       socket.on('playerConnected', function(player){
+
+        //change this to false later
         let contiunue = false;
-        console.log(player, self.games);
+        let enoughPlayers = false;
+        for(let i = 0; i < self.games.length; i++){
+          if(self.games[i].roomNr === player.room){
+            contiunue = true;
+            let obj = {
+              playerNr: player.nr,
+              user: socket.id
+            };
+            if(!self.games[i].players){
+              self.games[i].players = [];
+              self.games[i].players.push(obj);
+            }
+            else{
+              let pushYesOrNo = true;
+              for(let k = 0; k < self.games[i].players.length; k++){
+                if(self.games[i].players[k].playerNr === player.nr){
+                  pushYesOrNo = false;
+                }
+              }
+              if(pushYesOrNo){
+                self.games[i].players.push(obj);
+              }
+              else{
+                console.log('player bestaat al');
+              }
+            }
+            console.log('players', self.games[i].players.length);
+            if(self.games[i].players.length  === 2){
+              enoughPlayers = true;
+            }
+          }
+        }
+        if(contiunue){
+          if(enoughPlayers){
+            for(let i = 0; i < self.games.length; i++){
+              if(self.games[i].roomNr === player.room){
+                console.log(self.games[i]);
+                io.to(self.games[i].host).emit('allPlayersAreConnected');
+                for(let k = 0; k < self.games[i].players.length; k++){
+                  io.to(self.games[i].players[k].user).emit('allPlayersAreConnected');
+                }
+              }
+            }
+          }
+          else{
+            console.log('nog niet genoeg spelers');
+          }
+          //doe hier dingen zometeen
+        }
+        else {
+          console.log('deze lobby bestaat neit meer');
+          io.emit('lobbyDoesntExist');
+        }
+      });
+      socket.on('hostConnected', function(player){
+        //change this to false later
+        let contiunue = false;
         if(self.gameRooms.includes(player.room)){
           contiunue = true;
         }
         if(contiunue){
-          console.log('test');
+          //doe hier dingen zometeen
+          let obj = {
+            host: player.player,
+            roomNr: player.room
+          };
+          self.games.push(obj);
+          var indexOf = self.gameRooms.indexOf(player.room);
+          if (indexOf > -1) {
+            self.gameRooms.splice(indexOf, 1);
+          }
         }
         else {
           io.emit('lobbyDoesntExist');
+        }
+      });
+      socket.on('disconnect', function(){
+        for(let i = 0; i < self.games.length; i++){
+          if(self.games[i].host === socket.id){
+            //host verlaten
+            self.games.splice(i, 1);
+          }
+          else{
+            if(self.games[i].players){
+              for(let k = 0; k < self.games[i].players.length; k++){
+                if(self.games[i].players[k].user === socket.id){
+                  self.games[i].players.splice(k, 1);
+                }
+              }
+            }
+          }
         }
       });
     });

@@ -68,6 +68,7 @@ const socketHandler = {
     this.join();
     this.create();
     this.players();
+    this.host();
   },
   home: function(){
     // if(main.classList.contains('home')){
@@ -135,15 +136,16 @@ const socketHandler = {
         }
       });
       socket.on('startGame', function(room){
-        console.log(room);
-        if(yourPlayer === 1){
-          let url = '/game/player1/' + room.roomNumber;
-          window.location.href = url;
-        }
-        else if (yourPlayer === 2) {
-          let url = '/game/player2/' + room.roomNumber;
-          window.location.href = url;
-        }
+        setTimeout(function(){
+          if(yourPlayer === 1){
+            let url = '/game/player1/' + room.roomNumber;
+            window.location.href = url;
+          }
+          else if (yourPlayer === 2) {
+            let url = '/game/player2/' + room.roomNumber;
+            window.location.href = url;
+          }
+        }, 1000);
       });
     }
   },
@@ -221,6 +223,28 @@ const socketHandler = {
           room: room
         };
         socket.emit('playerConnected', obj);
+
+        socket.on('allPlayersAreConnected', function(){
+          console.log('test');
+          main.classList.add('active');
+        });
+      });
+    }
+  },
+  host: function(){
+    let you = '';
+    if(main.classList.contains('host')){
+      socket.on('connected', function(id){
+        you = id;
+        let url = window.location.href;
+        let room = '';
+        room = url.split('/host/');
+        room = room[1];
+        let obj = {
+          player: you,
+          room: room
+        };
+        socket.emit('hostConnected', obj);
       });
     }
   }
