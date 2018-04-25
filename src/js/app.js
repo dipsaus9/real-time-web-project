@@ -444,7 +444,7 @@ const socketHandler = {
           if(bounce){
             timeoutId = window.setTimeout(function(){
               letsPlay();
-            }, 50);
+            }, 20);
           }
         }
         let player1Point = 0;

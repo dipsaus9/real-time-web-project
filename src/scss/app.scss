@@ -16,7 +16,7 @@ $padWidth: 20vw;
   .gameSection{ width: calc(100% - #{$padWidth}); height: 100%; position: relative; left: calc(#{$padWidth} / 2); }
   .player1Pad{ top: 0; height: 25px; background: red; width: $padWidth; display: block; position: absolute; left: 50%; transform: translateX(-50%); }
   .player2Pad{ top: calc(100% - 25px); height: 25px; background: blue; width: $padWidth; display: block; position: absolute; left: 50%; transform: translateX(-50%); }
-  .ball{ display: block; background: green; position: absolute; top: 50%; left: 50%; width: 25px; height: 25px;  border-radius: 50%; transition: .03s ease-in-out; transform: translateZ(0);}
+  .ball{ display: block; background: green; position: absolute; top: 50%; left: 50%; width: 25px; height: 25px;  border-radius: 50%; transform: translateZ(0);}
 }
 .settings{ display: flex; width: 100vh; position: absolute; left: 100vw; top: 0; transform: rotate(90deg); transform-origin: 0 0;
   div{ width: 50%; height: 25px; background: white; color: black; text-align: center;
