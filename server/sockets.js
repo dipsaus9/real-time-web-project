@@ -189,13 +189,32 @@ const sockets = {
         for(let i = 0; i < self.games.length; i++){
           if(self.games[i].host === socket.id){
             //host verlaten
+            for(let k = 0; k < self.games[i].players.length; k++){
+              io.to(self.games[i].players[k].user).emit('gameHostDisconnect');
+            }
             self.games.splice(i, 1);
           }
           else{
-            if(self.games[i].players){
-              for(let k = 0; k < self.games[i].players.length; k++){
-                if(self.games[i].players[k].user === socket.id){
-                  self.games[i].players.splice(k, 1);
+            if(self.games[i]){
+              if(self.games[i].players){
+                let game = false;
+                for(let k = 0; k < self.games[i].players.length; k++){
+                  if(self.games[i].players[k].user === socket.id){
+                    game = true;
+                    self.games[i].players.splice(k, 1);
+                  }
+                }
+                if(game){
+                  let nr = 0;
+                  if(self.games[i].players[0]){
+                    if(self.games[i].players[0].playerNr === 1){
+                      nr = 1;
+                    }
+                    else{
+                      nr = 2;
+                    }
+                  }
+                  io.to(self.games[i].host).emit('playerDisconnected', nr);
                 }
               }
             }
@@ -204,11 +223,9 @@ const sockets = {
       });
       socket.on('cords', function(cord){
         let index = -1;
-        let user;
         for(let i = 0; i < self.games.length; i++){
           for(let k = 0; k < self.games[i].players.length; k++){
             if(self.games[i].players[k].user === socket.id){
-              user = socket.id;
               index = i;
               break;
             }

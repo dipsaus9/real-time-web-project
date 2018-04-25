@@ -1,64 +1,3 @@
-// const socket = io();
-//
-//
-// window.addEventListener('deviceorientation', handleOrientation, true);
-// let user;
-// let number = -1;
-// socket.on('start', function(id){
-//   user = id;
-// });
-// socket.on('users', function(users){
-//   let indexOf = users.indexOf(user);
-// });
-// let positionTouch = 50;
-// window.addEventListener('keydown', function(e){
-//   if(number !== 0){
-//     if(e.key == 'ArrowDown'){
-//       if(positionTouch < 100){
-//         positionTouch += 3;
-//         socket.emit('cords', positionTouch);
-//       }
-//     }
-//     else if(e.key == 'ArrowUp'){
-//       if(positionTouch > 0){
-//         positionTouch -= 3;
-//         socket.emit('cords', positionTouch);
-//       }
-//     }
-//   }
-// });
-// let previouwPosition = 180;
-// function handleOrientation(event) {
-//   var beta = event.beta;
-//   var difference = previouwPosition - beta;
-//   //maybe change the fire limit for later?
-//   if(difference > 0 || difference < 0){
-//     previouwPosition = beta;
-//     //cords can be from -180 to 180 create scale from this
-//     //create scale from 0 to 360
-//     let calcCord = beta + 180;
-//     //create scale from 0 to 100, then get the scale from 35 to 65, this will be the position of the element in %
-//     let position = ((calcCord * 100 / 360) - 35) / 0.3;
-//     if(position < 0){
-//       position = 0;
-//     }
-//     else if(position > 100){
-//       position = 100;
-//     }
-//     if(number !== 0){
-//     //emit a position from 0% to 100%
-//       socket.emit('cords', position);
-//     }
-//   }
-// }
-// var element1 = document.querySelector('#player1');
-// var element2 = document.querySelector('#player2');
-// socket.on('cords', function(cord){
-//   let firstPosition = cord[0].position + '%';
-//   element1.style.top = firstPosition;
-//   let secondPosition = cord[1].position + '%';
-//   element2.style.top = secondPosition;
-// });
 let main = document.querySelector('main');
 let previousPostion = 180;
 const socket = io();
@@ -85,11 +24,13 @@ const socketHandler = {
           element.innerHTML = '';
           for(let i = 0; i < rooms.length; i++){
             let li = document.createElement('li');
+            let button = document.createElement('button');
             let liText = document.createTextNode(rooms[i].roomNumber);
-            li.appendChild(liText);
-            li.addEventListener('click', function(){
+            button.appendChild(liText);
+            button.addEventListener('click', function(){
               socket.emit('joinRoom', rooms[i].roomNumber);
             });
+            li.appendChild(button);
             element.appendChild(li);
           }
         }
@@ -120,6 +61,8 @@ const socketHandler = {
             li.appendChild(liText);
             list.appendChild(li);
           }
+          let container = document.querySelector('.joined');
+          container.classList.add('active');
         }
       });
       socket.on('hostDisconnected', function(room){
@@ -222,7 +165,12 @@ const socketHandler = {
           room: room
         };
         socket.emit('playerConnected', obj);
-
+        socket.on('lobbyDoesntExist', function(){
+          let el = document.querySelector('.popup2');
+          let main = document.querySelector('main');
+          main.classList.add('active');
+          el.classList.add('active');
+        });
         socket.on('allPlayersAreConnected', function(){
           main.classList.add('active');
           play = true;
@@ -315,11 +263,16 @@ const socketHandler = {
         }
 
       });
+      socket.on('gameHostDisconnect', function(){
+        let element = document.querySelector('.host-diconnect');
+        element.classList.add('active');
+      });
     }
   },
   host: function(){
     let you = '';
     if(main.classList.contains('host')){
+      let play = false;
       socket.on('connected', function(id){
         you = id;
         let url = window.location.href;
@@ -334,7 +287,21 @@ const socketHandler = {
 
         socket.on('allPlayersAreConnected', function(){
           main.classList.add('active');
+          let el = document.querySelector('.popup');
+          el.classList.remove('active');
+          play = true;
           playGame();
+        });
+        socket.on('lobbyDoesntExist', function(){
+          let el = document.querySelector('.popup2')
+          el.classList.add('active');
+        });
+        socket.on('playerDisconnected', function(nr){
+          let el = document.querySelector('.popup');
+          let nrEl = document.querySelector('.popup span');
+          nrEl.innerHTML = nr;
+          el.classList.add('active');
+          play = false;
         });
         socket.on('cords', function(cords){
           let player1;
@@ -359,7 +326,7 @@ const socketHandler = {
           }
         });
         let ball = document.querySelector('.ball');
-        let direction = 'bottom';;
+        let direction = 'bottom';
         let leftRight = 'left';
         let timeoutId;
         let angle;
@@ -377,68 +344,70 @@ const socketHandler = {
           let windowWidth = window.innerWidth;
           let padWidth = windowWidth / 5;
           let bounce = true;
-          if(ballPositionLeft > 0 && leftRight == 'left'){
-            ballPositionLeft -= angle;
-            if(ballPositionLeft < 0){
-              ballPositionLeft = 0;
+          if(play){
+            if(ballPositionLeft > 0 && leftRight == 'left'){
+              ballPositionLeft -= angle;
+              if(ballPositionLeft < 0){
+                ballPositionLeft = 0;
+              }
+              ball.style.left = (ballPositionLeft + 'px');
             }
-            ball.style.left = (ballPositionLeft + 'px');
-          }
-          else if(ballPositionLeft <= 0 && leftRight == 'left'){
-            leftRight = 'right';
-          }
-          else if(ballPositionLeft < (windowWidth - 25) && leftRight == 'right'){
-            ballPositionLeft += angle;
-            if(ballPositionLeft > (windowWidth - 25)){
-              ballPositionLeft = (windowWidth - 25);
+            else if(ballPositionLeft <= 0 && leftRight == 'left'){
+              leftRight = 'right';
             }
-            ball.style.left = (ballPositionLeft + 'px');
-          }
-          else if(ballPositionLeft >= (windowWidth - 25) && leftRight == 'right'){
-            leftRight = 'left';
-          }
+            else if(ballPositionLeft < (windowWidth - 25) && leftRight == 'right'){
+              ballPositionLeft += angle;
+              if(ballPositionLeft > (windowWidth - 25)){
+                ballPositionLeft = (windowWidth - 25);
+              }
+              ball.style.left = (ballPositionLeft + 'px');
+            }
+            else if(ballPositionLeft >= (windowWidth - 25) && leftRight == 'right'){
+              leftRight = 'left';
+            }
 
-          if(ballPositionTop > 25 && direction == 'top'){
-            ballPositionTop -= 5;
-            ball.style.top = (ballPositionTop + 'px');
-          }
-          else if(ballPositionTop <= 25 && direction == 'top'){
-            let hit = false;
-            if(player1Cord < ballPositionLeft && (player1Cord + padWidth) >= ballPositionLeft){
-              hit = true;
+            if(ballPositionTop > 25 && direction == 'top'){
+              ballPositionTop -= 5;
+              ball.style.top = (ballPositionTop + 'px');
             }
-            else if(player1Cord > ballPositionLeft && (player1Cord + padWidth) <= ballPositionLeft){
-              hit = true;
+            else if(ballPositionTop <= 25 && direction == 'top'){
+              let hit = false;
+              if(player1Cord < ballPositionLeft && (player1Cord + padWidth) >= ballPositionLeft){
+                hit = true;
+              }
+              else if(player1Cord > ballPositionLeft && (player1Cord + padWidth) <= ballPositionLeft){
+                hit = true;
+              }
+              if(hit){
+                direction = 'bottom';
+              }
+              else{
+                window.clearTimeout(timeoutId);
+                bounce = false;
+                pointScored(2);
+              }
             }
-            if(hit){
-              direction = 'bottom';
+            else if(ballPositionTop < (windowHeight - 50) && direction == 'bottom'){
+              ballPositionTop += 5;
+              ball.style.top = (ballPositionTop + 'px');
             }
-            else{
-              window.clearTimeout(timeoutId);
-              bounce = false;
-              pointScored(2);
-            }
-          }
-          else if(ballPositionTop < (windowHeight - 50) && direction == 'bottom'){
-            ballPositionTop += 5;
-            ball.style.top = (ballPositionTop + 'px');
-          }
-          else if(ballPositionTop >= (windowHeight - 50 && direction == 'bottom')){
-            let hit = false;
-            if(player2Cord < ballPositionLeft && (player2Cord + padWidth) >= ballPositionLeft){
-              hit = true;
-            }
-            else if(player2Cord > ballPositionLeft && (player2Cord + padWidth) <= ballPositionLeft){
-              hit = true;
-            }
-            if(hit){
-              direction = 'top';
+            else if(ballPositionTop >= (windowHeight - 50 && direction == 'bottom')){
+              let hit = false;
+              if(player2Cord < ballPositionLeft && (player2Cord + padWidth) >= ballPositionLeft){
+                hit = true;
+              }
+              else if(player2Cord > ballPositionLeft && (player2Cord + padWidth) <= ballPositionLeft){
+                hit = true;
+              }
+              if(hit){
+                direction = 'top';
 
-            }
-            else{
-              window.clearTimeout(timeoutId);
-              bounce = false;
-              pointScored(1);
+              }
+              else{
+                window.clearTimeout(timeoutId);
+                bounce = false;
+                pointScored(1);
+              }
             }
           }
           if(bounce){

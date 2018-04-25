@@ -1,4 +1,14 @@
 body{ margin: 0; }
+$white: #FFF;
+$grey-black: #555555;
+$orange: #f18b68;
+$poep: #98462A;
+$greenBlue: #69E5CA;
+$darkGreen: #379883;
+$text: #282828;
+$blue: #366A98;
+$background: #f7f7f7;
+
 main{ width: 100vw; height: calc(100vh - 100px); max-width: 100%; max-height: 100%; position: relative;
 }
 .you{ font-weight: bold; }
@@ -29,4 +39,21 @@ $padWidth: 20vw;
     &.player1Score{ color: red; }
     &.player2Score{ color: blue; }
   }
+}
+
+.join, .home, .create{
+  .container{ width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; padding-top: 100px; max-width: 100%; max-height: 100%; flex-direction: column; overflow: hidden;
+    h1{ width: 100%; text-align: center; margin: 0; }
+    ul{ width: 100vw; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+  }
+  a{ background: $orange; color: white; padding: 15px; display: block; text-decoration: none; border: 1px solid rgba(black, .1); margin: 0px 15px; transition: .3s ease-in-out;
+    &:hover{ background: darken($orange, 5%); }
+  }
+}
+.joined, .host-diconnect, .popup, .popup2{ position: absolute; top: 0; left: 0; justify-content: center; align-items: center; width: 100vw; height: 100vh; display: none; max-width: 100%; max-height: 100%; overflow: hidden; flex-direction: column; z-index: 1; background: white;
+  &.active{ display: flex; }
+}
+.host-disconnect{ z-index: 2; }
+.home{
+  .container{ flex-direction: row; }
 }
