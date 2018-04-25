@@ -46,7 +46,7 @@ $padWidth: 20vw;
     h1{ width: 100%; text-align: center; margin: 0; }
     ul{ width: 100vw; display: flex; align-items: center; justify-content: center; flex-direction: column; }
   }
-  a{ background: $orange; color: white; padding: 15px; display: block; text-decoration: none; border: 1px solid rgba(black, .1); margin: 0px 15px; transition: .3s ease-in-out;
+  a{ background: $orange; color: white; padding: 15px; display: block; text-decoration: none; border: 1px solid rgba(black, .1); margin: 15px 15px; transition: .3s ease-in-out;
     &:hover{ background: darken($orange, 5%); }
   }
 }
@@ -54,6 +54,3 @@ $padWidth: 20vw;
   &.active{ display: flex; }
 }
 .host-disconnect{ z-index: 2; }
-.home{
-  .container{ flex-direction: row; }
-}
