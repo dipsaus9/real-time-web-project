@@ -334,9 +334,8 @@ const socketHandler = {
 
         socket.on('allPlayersAreConnected', function(){
           main.classList.add('active');
+          playGame();
         });
-        let player1Cords = 50;
-        let player2Cords = 50;
         socket.on('cords', function(cords){
           let player1;
           let player2;
@@ -353,16 +352,122 @@ const socketHandler = {
           if(player1){
             let pad1Position = player1.position + '%';
             pad1.style.left = pad1Position;
-            player1cords = player1.position;
           }
           if(player2){
             let pad2Position = player2.position + '%';
             pad2.style.left = pad2Position;
-            player2cords = player2.position;
           }
         });
         let ball = document.querySelector('.ball');
+        let direction = 'bottom';;
+        let leftRight = 'left';
+        let timeoutId;
+        let angle;
+        function playGame(){
+          timeoutId = undefined;
+          angle = Math.floor(Math.random() * 5) + 4;
+          letsPlay();
+        }
+        function letsPlay(){
+          let player1Cord = document.querySelector('.player1Pad').getBoundingClientRect().x;
+          let player2Cord = document.querySelector('.player2Pad').getBoundingClientRect().x;
+          let ballPositionTop = ball.getBoundingClientRect().y;
+          let ballPositionLeft = ball.getBoundingClientRect().x;
+          let windowHeight = window.innerHeight;
+          let windowWidth = window.innerWidth;
+          let padWidth = windowWidth / 5;
+          let bounce = true;
+          if(ballPositionLeft > 0 && leftRight == 'left'){
+            ballPositionLeft -= angle;
+            if(ballPositionLeft < 0){
+              ballPositionLeft = 0;
+            }
+            ball.style.left = (ballPositionLeft + 'px');
+          }
+          else if(ballPositionLeft <= 0 && leftRight == 'left'){
+            leftRight = 'right';
+          }
+          else if(ballPositionLeft < (windowWidth - 25) && leftRight == 'right'){
+            ballPositionLeft += angle;
+            if(ballPositionLeft > (windowWidth - 25)){
+              ballPositionLeft = (windowWidth - 25);
+            }
+            ball.style.left = (ballPositionLeft + 'px');
+          }
+          else if(ballPositionLeft >= (windowWidth - 25) && leftRight == 'right'){
+            leftRight = 'left';
+          }
 
+          if(ballPositionTop > 25 && direction == 'top'){
+            ballPositionTop -= 5;
+            ball.style.top = (ballPositionTop + 'px');
+          }
+          else if(ballPositionTop <= 25 && direction == 'top'){
+            let hit = false;
+            if(player1Cord < ballPositionLeft && (player1Cord + padWidth) >= ballPositionLeft){
+              hit = true;
+            }
+            else if(player1Cord > ballPositionLeft && (player1Cord + padWidth) <= ballPositionLeft){
+              hit = true;
+            }
+            if(hit){
+              direction = 'bottom';
+            }
+            else{
+              window.clearTimeout(timeoutId);
+              bounce = false;
+              pointScored(2);
+            }
+          }
+          else if(ballPositionTop < (windowHeight - 50) && direction == 'bottom'){
+            ballPositionTop += 5;
+            ball.style.top = (ballPositionTop + 'px');
+          }
+          else if(ballPositionTop >= (windowHeight - 50 && direction == 'bottom')){
+            let hit = false;
+            if(player2Cord < ballPositionLeft && (player2Cord + padWidth) >= ballPositionLeft){
+              hit = true;
+            }
+            else if(player2Cord > ballPositionLeft && (player2Cord + padWidth) <= ballPositionLeft){
+              hit = true;
+            }
+            if(hit){
+              direction = 'top';
+
+            }
+            else{
+              window.clearTimeout(timeoutId);
+              bounce = false;
+              pointScored(1);
+            }
+          }
+          if(bounce){
+            timeoutId = window.setTimeout(function(){
+              letsPlay();
+            }, 50);
+          }
+        }
+        let player1Point = 0;
+        let player2Point = 0;
+        function pointScored(id){
+          let firstScore = document.querySelector('.player1Score');
+          let secondScore = document.querySelector('.player2Score');
+          if(id === 1){
+            player1Point += 1;
+            direction = 'top';
+            firstScore.innerHTML = player1Point;
+          }
+          else if(id === 2){
+            player2Point += 1;
+            direction = 'bottom';
+            secondScore.innerHTML = player2Point;
+          }
+          ball.style.top = '50%';
+          ball.style.left = '50%';
+          setTimeout(function(){
+            playGame();
+          }, 300);
+        }
       });
     }
   },
