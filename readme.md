@@ -74,5 +74,9 @@ I made this project in 4 days during a school assignment. Unfortunately this pro
 - [ ] Add session ID with sockets
 - [ ] Give host a opportunity to kick players
 
+### Structure
+![Data model](data.jpg)
+
+
 # License
 MIT © Dipsaus9
