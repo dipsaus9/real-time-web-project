@@ -144,8 +144,6 @@ All data being saved on the server:
 -   Players
 -   Game rooms
 
-![Data model](https://github.com/dipsaus9/real-time-web-project/data.jpg)
-
 
 # License
 MIT © Dipsaus9
